@@ -2,431 +2,197 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import {
-  Activity,
-  Zap,
-  Radio,
-  Server,
-  ArrowRight,
-  TrendingUp,
-  AlertTriangle,
-  Sparkles,
-  Layers,
-  ChevronRight,
-  Clock,
-  ExternalLink,
-  Cpu,
-  HardDrive,
-  CheckCircle2,
-  Database,
-  Sliders
-} from 'lucide-react';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  ReferenceArea,
-  CartesianGrid
-} from 'recharts';
+import { AlertTriangle, ArrowRight, ChevronRight, Sparkles } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceArea, CartesianGrid } from 'recharts';
 import { useLiveTelemetry } from '@/lib/hooks/useLiveTelemetry';
 import { mockIncidents, mockServices } from '@/lib/mock/data';
-import { formatNumber, formatLatency, formatPercent } from '@/lib/utils';
 import { TopologyGraph } from '@/components/topology/TopologyGraph';
 
+type Metric = 'latency' | 'dbPool' | 'errorRate' | 'throughput';
+
+const metricConfig: Record<Metric, { label: string; key: string; color: string; unit: (v: number) => string }> = {
+  latency: { label: 'P95 Latency', key: 'p95Latency', color: '#ff5b52', unit: (v) => `${v}ms` },
+  dbPool: { label: 'DB Conn Pool %', key: 'dbConnectionPoolPercent', color: '#7774ff', unit: (v) => `${v}%` },
+  errorRate: { label: 'Error Rate %', key: 'errorRate', color: '#f5a623', unit: (v) => `${v}%` },
+  throughput: { label: 'RPS Volume', key: 'rps', color: '#369eff', unit: (v) => `${(v / 1000).toFixed(0)}k` },
+};
+
 export default function OverviewPage() {
-  const { metrics: liveMetrics, health: liveHealth, services: liveServices, isConnected, lastTick } = useLiveTelemetry(2000);
-  const [activeChartMetric, setActiveChartMetric] = useState<'latency' | 'dbPool' | 'errorRate' | 'throughput'>('latency');
+  const { metrics: liveMetrics, services: liveServices, isConnected } = useLiveTelemetry(2000);
+  const [metric, setMetric] = useState<Metric>('latency');
+  const cfg = metricConfig[metric];
 
   const metricsData = liveMetrics.length > 0 ? liveMetrics : [];
-  const healthData = liveHealth || {
-    overallHealthPercent: 99.2,
-    totalServices: 24,
-    activeIncidentsCount: 3,
-    activeAnomaliesCount: 17,
-    globalRps: 148200,
-    globalAvgP95LatencyMs: 420,
-    globalErrorRatePercent: 0.74,
-    statusMessage: "Real-time telemetry operational"
-  };
   const servicesData = liveServices.length > 0 ? liveServices : mockServices;
 
+
   return (
-    <div className="space-y-4">
-      {/* Top System Status Banner */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-white/[0.08]">
+    <>
+      <section className="page-heading">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg sm:text-xl font-semibold text-white tracking-tight font-sans">
-              System Overview & Infrastructure Health
-            </h1>
-            <span className="w-2 h-2 rounded-full bg-apple-critical animate-pulse" />
+          <div className="title">Overview</div>
+          <p>Production systems at a glance <span>·</span> Last updated just now</p>
+        </div>
+        <div className="heading-meta">
+          <span className="connected" style={{ color: isConnected ? undefined : 'var(--warning)' }}>
+            <i /> {isConnected ? 'STREAM CONNECTED' : 'STREAM OFFLINE (MOCK)'}
+          </span>
+          <span>UTC {new Date().toISOString().slice(11, 19)}</span>
+        </div>
+      </section>
+
+      <section className="incident-banner">
+        <div className="incident-icon"><AlertTriangle className="icon" /></div>
+        <div className="incident-copy">
+          <div>
+            <span className="badge badge-danger">SEV-1</span>
+            <strong>Payment Service Latency Degradation</strong>
+            <span className="incident-id">INC-2026-0817</span>
           </div>
-          <p className="text-xs text-apple-textTertiary mt-0.5">
-            Real-time multi-signal telemetry ingestion across 24 distributed microservices.
-          </p>
+          <p>Database connection saturation is propagating timeouts from payment-service to order-service and api-gateway</p>
+        </div>
+        <div className="incident-stats">
+          <div><small>Duration</small><strong>8m 31s</strong></div>
+          <div><small>Impact</small><strong className="danger-text">3 services</strong></div>
+          <div><small>Status</small><strong className="warning-text"><i /> Investigating</strong></div>
+        </div>
+        <Link href="/incidents/INC-2026-0817" className="investigate-control">
+          Investigate <ArrowRight className="icon icon-small" />
+        </Link>
+      </section>
+
+      <section className="dashboard-grid">
+        {/* Fleet health */}
+        <div className="card fleet-card">
+          <div className="card-head">
+            <div><span className="eyebrow">FLEET HEALTH</span><div className="title card-title">System reliability</div></div>
+            <span className="badge badge-success"><span className="pulse-dot" /> OPERATIONAL</span>
+          </div>
+          <div className="fleet-summary">
+            <div className="health-score">
+              <strong>99.2<span>%</span></strong>
+              <small>Uptime SLA (target 99.0%)</small>
+              <em>Nominal</em>
+            </div>
+            <div className="kpi-grid">
+              <div className="kpi"><small>Services</small><strong>24</strong><span><i className="ok" /> 21 healthy</span></div>
+              <div className="kpi"><small>Incidents</small><strong className="danger-text">3</strong><span>1 Sev-1 · 2 degraded</span></div>
+              <div className="kpi"><small>Anomalies (30m)</small><strong className="warning-text">17</strong><span>3 incident clusters</span></div>
+              <div className="kpi"><small>Request rate</small><strong>148k</strong><span>req / sec</span></div>
+            </div>
+          </div>
+          <div className="health-bar"><span className="healthy-segment" /><span className="warning-segment" /><span className="danger-segment" /></div>
+          <div className="health-legend">
+            <span><i className="ok" /> Healthy <strong>21</strong></span>
+            <span><i className="warn" /> Degraded <strong>2</strong></span>
+            <span><i className="bad" /> Critical <strong>1</strong></span>
+          </div>
         </div>
 
-        {/* Global Action Banner */}
-        <div className="flex items-center gap-2">
-          <Link
-            href="/incidents/INC-2026-0817"
-            className="px-3 py-1.5 rounded-[5px] bg-apple-critical/15 hover:bg-apple-critical/25 border border-apple-critical/30 text-apple-critical text-xs font-semibold flex items-center gap-2 transition"
-          >
-            <Zap className="w-3.5 h-3.5" />
-            <span>Investigate Active SEV-1 Incident (INC-2026-0817)</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+        {/* AI diagnosis */}
+        <div className="card ai-card">
+          <div className="ai-glow" />
+          <div className="card-head">
+            <div className="ai-label">
+              <span className="ai-icon"><Sparkles className="icon" /></span>
+              <div><span className="eyebrow">INFER AI</span><div className="title card-title">Active diagnosis</div></div>
+            </div>
+            <span className="badge badge-indigo">96% CONFIDENCE</span>
+          </div>
+          <p className="ai-summary">Connection pool exhaustion in <code>payment-service</code> is causing cascading timeouts upstream.</p>
+          <div className="root-cause">
+            <span>LIKELY ROOT CAUSE</span>
+            <strong>postgres-db connection saturation</strong>
+            <small>Correlated across 4 signals · Detected 6m ago</small>
+          </div>
+          <div className="ai-signals">
+            <span><i /> DB pool <strong>97%</strong></span>
+            <span><i /> Payment <strong>4.8s</strong></span>
+            <span><i /> Order <strong>504</strong></span>
+          </div>
+          <Link href="/incidents/INC-2026-0817" className="ai-action">
+            View full diagnosis <ArrowRight className="icon icon-small" />
           </Link>
         </div>
-      </div>
 
-      {/* SYSTEM HEALTH: Activity Monitor / Instruments Style Hardware & Fleet Matrix */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-stretch">
-        {/* Global Health Index & Cluster Breakdown (7 Cols) */}
-        <div className="lg:col-span-7 p-4 rounded-xl bg-[#16161A] border border-white/[0.08] flex flex-col justify-between shadow-sm">
-          <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
-            <div className="flex items-center gap-2">
-              <Activity className="w-3.5 h-3.5 text-apple-accent" />
-              <span className="text-xs font-semibold text-white uppercase tracking-wider">
-                Fleet Health Index
-              </span>
-            </div>
-            <span className="text-[11px] font-mono text-apple-success bg-apple-success/10 px-2 py-0.5 rounded border border-apple-success/20 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-apple-success" />
-              <span>99.2% Nominal</span>
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4 tabular-nums">
-            {/* Health Score */}
-            <div className="p-2.5 rounded-lg bg-[#111114] border border-white/[0.04]">
-              <div className="text-[10px] text-apple-textTertiary uppercase font-mono">Uptime SLA</div>
-              <div className="text-2xl font-mono font-bold text-white mt-1">99.2%</div>
-              <div className="text-[10px] text-apple-success mt-0.5">Target: 99.0%</div>
-            </div>
-
-            {/* Total Services */}
-            <div className="p-2.5 rounded-lg bg-[#111114] border border-white/[0.04]">
-              <div className="text-[10px] text-apple-textTertiary uppercase font-mono">Services</div>
-              <div className="text-2xl font-mono font-bold text-white mt-1">24</div>
-              <div className="text-[10px] text-apple-textTertiary mt-0.5">21 Ok · 3 Degraded</div>
-            </div>
-
-            {/* Active Incidents */}
-            <div className="p-2.5 rounded-lg bg-[#111114] border border-white/[0.04]">
-              <div className="text-[10px] text-apple-textTertiary uppercase font-mono">Active Incidents</div>
-              <div className="text-2xl font-mono font-bold text-apple-critical mt-1">3</div>
-              <div className="text-[10px] text-apple-critical mt-0.5">1 Sev-1 · 2 Degraded</div>
-            </div>
-
-            {/* Anomaly clusters */}
-            <div className="p-2.5 rounded-lg bg-[#111114] border border-white/[0.04]">
-              <div className="text-[10px] text-apple-textTertiary uppercase font-mono">Anomalies (30m)</div>
-              <div className="text-2xl font-mono font-bold text-apple-warning mt-1">17</div>
-              <div className="text-[10px] text-indigo-400 mt-0.5">3 Incident clusters</div>
-            </div>
-          </div>
-
-          {/* Service Fleet Distribution Bar */}
-          <div className="space-y-1.5 pt-2 border-t border-white/[0.06]">
-            <div className="flex items-center justify-between text-[11px] text-apple-textSecondary tabular-nums">
-              <span>Fleet Component Distribution (24 Total)</span>
-              <span className="font-mono text-apple-textTertiary text-[10px]">87.5% Healthy · 12.5% Degraded</span>
-            </div>
-            <div className="w-full h-1.5 rounded-full bg-white/[0.06] flex overflow-hidden">
-              <div className="h-full bg-apple-success" style={{ width: '87.5%' }} title="21 Healthy" />
-              <div className="h-full bg-apple-degraded" style={{ width: '8.3%' }} title="2 Degraded" />
-              <div className="h-full bg-apple-critical" style={{ width: '4.2%' }} title="1 Critical" />
-            </div>
-          </div>
-        </div>
-
-        {/* AI Incident Diagnostic Spotlight (5 Cols) */}
-        <div className="lg:col-span-5 p-4 rounded-xl bg-[#16161A] border border-white/[0.08] flex flex-col justify-between shadow-sm">
-          <div>
-            <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                <span className="text-xs font-semibold text-white uppercase tracking-wider">
-                  Apple Intelligence Diagnostic
-                </span>
-              </div>
-              <span className="text-[10px] font-mono font-semibold text-indigo-300 bg-indigo-500/15 px-2 py-0.5 rounded border border-indigo-500/25">
-                96% Confidence
-              </span>
-            </div>
-
-            <div className="mt-2.5 space-y-1.5">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-bold text-apple-critical px-1.5 py-0.2 rounded bg-apple-critical/15 border border-apple-critical/20">
-                  INC-2026-0817
-                </span>
-                <span className="text-xs font-semibold text-white">Payment Service Latency Degradation</span>
-              </div>
-
-              <p className="text-xs text-apple-textSecondary leading-relaxed">
-                Database connection utilization reached 97%. Query wait timeouts in Payment Service propagated upstream to Order Service and API Gateway.
-              </p>
-
-              <div className="p-2 rounded-lg bg-[#111114] border border-white/[0.04] text-[10px] font-mono text-apple-textTertiary flex items-center gap-2">
-                <span className="text-apple-critical font-bold">DB (97% Pool)</span>
-                <span>→</span>
-                <span className="text-apple-critical font-medium">Payment (4.8s)</span>
-                <span>→</span>
-                <span className="text-apple-degraded">Order (504)</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-3 mt-3 border-t border-white/[0.06] flex items-center justify-between">
-            <span className="text-[11px] text-apple-textTertiary font-mono">Duration: 8m 31s</span>
-            <Link
-              href="/incidents/INC-2026-0817"
-              className="inline-flex items-center gap-1 text-xs text-apple-accent hover:underline font-medium"
-            >
-              <span>Open Investigation Workspace</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* REAL-TIME ACTIVITY: High-Precision Activity Monitor Style Telemetry Charts */}
-      <div className="p-4 rounded-xl bg-[#16161A] border border-white/[0.08] space-y-3 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-white/[0.06]">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-3.5 h-3.5 text-apple-accent" />
+        {/* Telemetry chart */}
+        <div className="card span-12" style={{ padding: 16 }}>
+          <div className="card-head" style={{ flexWrap: 'wrap' }}>
             <div>
-              <h2 className="text-xs font-semibold text-white uppercase tracking-wider font-sans">
-                Real-Time Telemetry & Metric Correlations
-              </h2>
-              <span className="text-[10px] text-apple-textTertiary">
-                Shaded window demarcates correlated incident anomaly interval (13:12 – 13:30 UTC)
-              </span>
+              <span className="eyebrow">REAL-TIME TELEMETRY</span>
+              <div className="title card-title">Metric correlations</div>
+            </div>
+            <div className="flex items-center macos-segmented-button">
+              {(Object.keys(metricConfig) as Metric[]).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setMetric(m)}
+                  className={`px-2.5 py-1 rounded-[4px] text-[10px] font-medium transition ${metric === m ? 'macos-segmented-item-active' : 'text-[#a1a1a1] hover:text-white'}`}
+                >
+                  {metricConfig[m].label}
+                </button>
+              ))}
             </div>
           </div>
-
-          {/* Metric Selector Tabs */}
-          <div className="flex items-center macos-segmented-button text-xs">
-            <button
-              onClick={() => setActiveChartMetric('latency')}
-              className={`px-2.5 py-1 rounded-[5px] text-[11px] font-medium transition ${
-                activeChartMetric === 'latency'
-                  ? 'macos-segmented-item-active'
-                  : 'text-apple-textSecondary hover:text-white'
-              }`}
-            >
-              P95 Latency
-            </button>
-            <button
-              onClick={() => setActiveChartMetric('dbPool')}
-              className={`px-2.5 py-1 rounded-[5px] text-[11px] font-medium transition ${
-                activeChartMetric === 'dbPool'
-                  ? 'macos-segmented-item-active'
-                  : 'text-apple-textSecondary hover:text-white'
-              }`}
-            >
-              DB Conn Pool %
-            </button>
-            <button
-              onClick={() => setActiveChartMetric('errorRate')}
-              className={`px-2.5 py-1 rounded-[5px] text-[11px] font-medium transition ${
-                activeChartMetric === 'errorRate'
-                  ? 'macos-segmented-item-active'
-                  : 'text-apple-textSecondary hover:text-white'
-              }`}
-            >
-              Error Rate %
-            </button>
-            <button
-              onClick={() => setActiveChartMetric('throughput')}
-              className={`px-2.5 py-1 rounded-[5px] text-[11px] font-medium transition ${
-                activeChartMetric === 'throughput'
-                  ? 'macos-segmented-item-active'
-                  : 'text-apple-textSecondary hover:text-white'
-              }`}
-            >
-              RPS Volume
-            </button>
+          <div style={{ height: 240, width: '100%', marginTop: 10 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={metricsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="cGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={cfg.color} stopOpacity={0.25} />
+                    <stop offset="95%" stopColor={cfg.color} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="2 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="timestamp" stroke="#5c5c68" fontSize={9} tickLine={false} axisLine={{ stroke: '#242424' }} />
+                <YAxis stroke="#5c5c68" fontSize={9} tickLine={false} axisLine={false} tickFormatter={cfg.unit} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: 6, fontSize: 11, color: '#ededed', fontFamily: 'DM Mono, monospace' }}
+                  formatter={(value: any) => [cfg.unit(Number(value)), cfg.label]}
+                />
+                <ReferenceArea
+                  x1="13:12" x2="13:30" strokeOpacity={0.3} fill="#ff5b52" fillOpacity={0.06}
+                  label={{ value: 'INC-2026-0817', fill: '#ff5b52', fontSize: 9, position: 'insideTopLeft' }}
+                />
+                <Area type="monotone" dataKey={cfg.key} stroke={cfg.color} strokeWidth={1.8} fill="url(#cGrad)" fillOpacity={1} />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Crisp Activity Monitor / Instruments Style Chart Canvas */}
-        <div className="h-60 w-full pt-1">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={metricsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="cGradLatency" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#FF453A" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#FF453A" stopOpacity={0.0} />
-                </linearGradient>
-                <linearGradient id="cGradPool" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6366F1" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#6366F1" stopOpacity={0.0} />
-                </linearGradient>
-                <linearGradient id="cGradErr" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#FF9F0A" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#FF9F0A" stopOpacity={0.0} />
-                </linearGradient>
-                <linearGradient id="cGradRps" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#0A84FF" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#0A84FF" stopOpacity={0.0} />
-                </linearGradient>
-              </defs>
-
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-
-              <XAxis
-                dataKey="timestamp"
-                stroke="#636366"
-                fontSize={10}
-                tickLine={false}
-                axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
-              />
-              <YAxis
-                stroke="#636366"
-                fontSize={10}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(val) => {
-                  if (activeChartMetric === 'latency') return `${val}ms`;
-                  if (activeChartMetric === 'dbPool' || activeChartMetric === 'errorRate') return `${val}%`;
-                  return `${(val / 1000).toFixed(0)}k`;
-                }}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#1C1C22',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  borderRadius: '6px',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-                  fontSize: '11px',
-                  color: '#F2F2F7',
-                  fontFamily: 'monospace',
-                }}
-                formatter={(value: any) => [
-                  activeChartMetric === 'latency'
-                    ? `${value} ms`
-                    : activeChartMetric === 'dbPool' || activeChartMetric === 'errorRate'
-                    ? `${value} %`
-                    : `${value} req/min`,
-                  activeChartMetric.toUpperCase(),
-                ]}
-              />
-
-              <ReferenceArea
-                x1="13:12"
-                x2="13:30"
-                strokeOpacity={0.3}
-                fill="#FF453A"
-                fillOpacity={0.06}
-                label={{
-                  value: 'INC-2026-0817 Incident Interval',
-                  fill: '#FF453A',
-                  fontSize: 10,
-                  position: 'insideTopLeft',
-                }}
-              />
-
-              {activeChartMetric === 'latency' && (
-                <Area
-                  type="monotone"
-                  dataKey="p95Latency"
-                  stroke="#FF453A"
-                  strokeWidth={1.75}
-                  fillOpacity={1}
-                  fill="url(#cGradLatency)"
-                  isAnimationActive={true}
-                />
-              )}
-
-              {activeChartMetric === 'dbPool' && (
-                <Area
-                  type="monotone"
-                  dataKey="dbConnectionPoolPercent"
-                  stroke="#6366F1"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#cGradPool)"
-                  isAnimationActive={true}
-                />
-              )}
-
-              {activeChartMetric === 'errorRate' && (
-                <Area
-                  type="monotone"
-                  dataKey="errorRate"
-                  stroke="#FF9F0A"
-                  strokeWidth={1.75}
-                  fillOpacity={1}
-                  fill="url(#cGradErr)"
-                  isAnimationActive={true}
-                />
-              )}
-
-              {activeChartMetric === 'throughput' && (
-                <Area
-                  type="monotone"
-                  dataKey="rps"
-                  stroke="#0A84FF"
-                  strokeWidth={1.75}
-                  fillOpacity={1}
-                  fill="url(#cGradRps)"
-                  isAnimationActive={true}
-                />
-              )}
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Bottom Row: Active Incidents List & Topology Micro-Canvas */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
-        {/* Incidents (5 Cols) */}
-        <div className="lg:col-span-5 p-4 rounded-xl bg-[#16161A] border border-white/[0.08] flex flex-col justify-between shadow-sm">
-          <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
-            <div className="flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5 text-apple-critical" />
-              <span className="text-xs font-semibold text-white uppercase tracking-wider">Active System Incidents</span>
-            </div>
-            <Link href="/incidents" className="text-[11px] text-apple-accent hover:underline">
-              View All (3)
-            </Link>
+        {/* Incidents */}
+        <div className="card incidents-card span-5">
+          <div className="card-head">
+            <div><span className="eyebrow">ACTIVE INCIDENTS</span><div className="title card-title">3 require attention</div></div>
+            <Link href="/incidents" className="text-control">View all <ArrowRight className="icon icon-small" /></Link>
           </div>
-
-          <div className="space-y-1.5 mt-2 flex-1">
-            {mockIncidents.slice(0, 3).map((inc) => (
-              <Link
-                key={inc.id}
-                href={`/incidents/${inc.code}`}
-                className="p-2.5 rounded-lg bg-[#111114] hover:bg-[#1C1C22] border border-white/[0.04] flex items-center justify-between transition group block"
-              >
+          <div className="incident-list">
+            {mockIncidents.slice(0, 3).map((inc, i) => (
+              <Link key={inc.id} href={`/incidents/${inc.code}`} className="incident-row">
+                <span className={`severity-bar ${i === 0 ? 'critical' : i === 1 ? 'warning' : 'info'}`} />
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-apple-critical">{inc.code}</span>
-                    <span className="text-xs text-white/90 font-medium truncate">{inc.title}</span>
-                  </div>
-                  <div className="text-[10px] text-apple-textTertiary mt-0.5">
-                    Cause: <span className="text-white/80">{inc.rootCauseBrief}</span>
-                  </div>
+                  <span>
+                    <span className={`badge ${i === 0 ? 'badge-danger' : i === 1 ? 'badge-warning' : 'badge-blue'}`}>SEV-{i + 1}</span>
+                    <strong>{inc.title}</strong>
+                  </span>
+                  <small>{inc.code} · {inc.rootCauseBrief}</small>
                 </div>
-                <ChevronRight className="w-3.5 h-3.5 text-apple-textTertiary group-hover:text-white transition" />
+                <ChevronRight className="icon icon-small" />
               </Link>
             ))}
           </div>
         </div>
 
-        {/* Mini Topology Canvas (7 Cols) */}
-        <div className="lg:col-span-7 flex flex-col">
+        {/* Topology (existing graph component) */}
+        <div className="span-7 flex flex-col">
           <TopologyGraph
             services={servicesData}
             highlightPath={['postgres-db', 'payment-service', 'order-service', 'api-gateway']}
             compact={true}
           />
         </div>
-      </div>
-    </div>
+      </section>
+    </>
   );
 }

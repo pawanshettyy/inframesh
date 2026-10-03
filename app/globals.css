@@ -1,185 +1,46 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --macos-bg: #161618;
-  --macos-titlebar: #1E1E22;
-  --macos-sidebar: #19191C;
-  --macos-content: #121214;
-  --macos-card: #202024;
-  --macos-border: rgba(255, 255, 255, 0.08);
-  --macos-border-subtle: rgba(255, 255, 255, 0.05);
-  --macos-selection: #007AFF;
-  --macos-text-primary: #F2F2F7;
-  --macos-text-secondary: #98989D;
-  --macos-text-tertiary: #636366;
-  --macos-system-green: #30D158;
-  --macos-system-yellow: #FFD60A;
-  --macos-system-orange: #FF9F0A;
-  --macos-system-red: #FF453A;
-  --macos-system-blue: #0A84FF;
-  --macos-system-indigo: #5E5CE6;
-}
+/* ------------------------------------------------------------------
+   Legacy bridge: pages that still use Tailwind utilities + the old
+   macOS helper classes are re-skinned to the new control-plane theme.
+   ------------------------------------------------------------------ */
+body { font-size: 13px; }
 
-* {
-  box-sizing: border-box;
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum";
-}
-
-body {
-  background-color: #0E0E10;
-  color: var(--macos-text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Inter", -apple-system, system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  letter-spacing: -0.012em;
-  overflow-x: hidden;
-}
-
-/* Tabular Numbers for Technical Metrics */
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum";
-}
-
-/* Realistic macOS Window Frame & Shadows */
-.macos-window {
-  background: #141416;
-  box-shadow: 
-    0 40px 100px -20px rgba(0, 0, 0, 0.85),
-    0 20px 40px -15px rgba(0, 0, 0, 0.7),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.15) inset;
-}
-
-.macos-titlebar {
-  background: linear-gradient(180deg, rgba(38, 38, 44, 0.92) 0%, rgba(28, 28, 33, 0.92) 100%);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
+.tabular-nums { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
 
 .macos-toolbar-item {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
-  transition: all 0.12s ease;
+  background: #080808;
+  border: 1px solid var(--border, #242424);
+  transition: background .15s ease, border-color .15s ease;
 }
+.macos-toolbar-item:hover { background: #111; border-color: #333; }
 
-.macos-toolbar-item:hover {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(255, 255, 255, 0.12);
-}
+.macos-surface { background: #0a0a0a; border: 1px solid #242424; }
+.macos-surface-elevated { background: #111; border: 1px solid #333; box-shadow: 0 20px 50px rgba(0,0,0,.45); }
 
-.macos-toolbar-item:active {
-  background: rgba(255, 255, 255, 0.04);
-  transform: translateY(0.5px);
-}
+.macos-segmented-button { background: #080808; border-radius: 5px; padding: 2px; border: 1px solid #242424; }
+.macos-segmented-item-active { background: #1a1a1a; color: #fff; }
 
-/* macOS Realistic System Surfaces */
-.macos-surface {
-  background: #1A1A1E;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
-}
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.16); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.3); border: 2px solid transparent; background-clip: padding-box; }
 
-.macos-surface-elevated {
-  background: #222228;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.08) inset;
-}
+.xcode-table-header { background: #0e0e0e; border-bottom: 1px solid #242424; color: #8e8e9a; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .03em; }
+.xcode-table-row { border-bottom: 1px solid #1a1a1a; transition: background-color .1s ease; }
+.xcode-table-row:hover { background-color: #111; }
+.xcode-table-row:nth-child(even) { background-color: rgba(255,255,255,.012); }
 
-.macos-segmented-button {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
-  padding: 2px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
+@keyframes edge-flow { from { stroke-dashoffset: 20; } to { stroke-dashoffset: 0; } }
+.animate-edge-flow { stroke-dasharray: 5, 5; animation: edge-flow 1s linear infinite; }
 
-.macos-segmented-item-active {
-  background: rgba(255, 255, 255, 0.14);
-  color: #FFFFFF;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.1) inset;
-}
-
-/* Slender macOS Overlay Scrollbars */
-::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.18);
-  border-radius: 8px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.32);
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-
-/* Traffic Lights */
-.traffic-dot-close {
-  background: #FF5F56;
-  border: 0.5px solid #E0443E;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-.traffic-dot-min {
-  background: #FFBD2E;
-  border: 0.5px solid #DEA123;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-.traffic-dot-max {
-  background: #27C93F;
-  border: 0.5px solid #1AAB29;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-/* Xcode / Console Table Grid */
-.xcode-table-header {
-  background: #1C1C20;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  color: #8E8E93;
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.xcode-table-row {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  transition: background-color 0.1s ease;
-}
-
-.xcode-table-row:hover {
-  background-color: rgba(255, 255, 255, 0.04);
-}
-
-.xcode-table-row:nth-child(even) {
-  background-color: rgba(255, 255, 255, 0.015);
-}
-
-/* Subtle Flow animation for topology */
-@keyframes edge-flow {
-  from {
-    stroke-dashoffset: 20;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.animate-edge-flow {
-  stroke-dasharray: 5, 5;
-  animation: edge-flow 1s linear infinite;
+/* Overview grid spans (higher specificity than the base card spans) */
+.dashboard-grid > .span-12 { grid-column: span 12; }
+.dashboard-grid > .span-5 { grid-column: span 5; }
+.dashboard-grid > .span-7 { grid-column: span 7; }
+@media (max-width: 1180px) {
+  .dashboard-grid > .span-5, .dashboard-grid > .span-7 { grid-column: span 12; }
 }

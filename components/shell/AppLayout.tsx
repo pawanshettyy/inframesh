@@ -1,293 +1,192 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  Activity,
-  Zap,
-  Server,
-  Network,
-  Terminal,
-  Radio,
-  FileText,
-  Search,
-  Sliders,
-  CheckCircle2,
-  ChevronDown,
-  Bell,
-  Sparkles,
-  Command,
-  Play,
-  Pause,
-  RefreshCw,
-  Cpu,
-  Layers
+  Activity, Zap, Server, Network, Terminal, Radio, FileText, Sliders,
+  Search, Bell, ChevronRight, ChevronDown, Clock, Pause, Play, CheckCircle2,
 } from 'lucide-react';
 import { SpotlightPalette } from './SpotlightPalette';
-import { cn } from '@/lib/utils';
-import { mockSystemHealth, mockIncidents } from '@/lib/mock/data';
+import { mockIncidents } from '@/lib/mock/data';
 
-interface AppLayoutProps {
-  children: React.ReactNode;
+const navItems = [
+  { href: '/', label: 'Overview', icon: Activity },
+  { href: '/incidents', label: 'Incidents', icon: Zap, count: '3' },
+  { href: '/services', label: 'Services', icon: Server, count: '24' },
+  { href: '/topology', label: 'Topology', icon: Network },
+  { href: '/telemetry', label: 'Telemetry', icon: Terminal },
+  { href: '/anomalies', label: 'Anomalies', icon: Radio, count: '17' },
+  { href: '/simulation', label: 'Simulation', icon: Sliders },
+  { href: '/reports', label: 'Reports', icon: FileText },
+];
+
+const environments = ['production-us-east-1', 'production-eu-central-1', 'staging-us-east-1'];
+const timeRanges = ['Last 5m', 'Last 15m', 'Last 30m', 'Last 1h', 'Last 6h', 'Last 24h'];
+
+function BrandMark() {
+  return <div className="brand-mark"><span /><span /><span /></div>;
 }
 
-export function AppLayout({ children }: AppLayoutProps) {
+export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [spotlightOpen, setSpotlightOpen] = useState(false);
+  const [live, setLive] = useState(true);
+  const [alertsOpen, setAlertsOpen] = useState(false);
+  const [envOpen, setEnvOpen] = useState(false);
+  const [env, setEnv] = useState(environments[0]);
+  const [timeOpen, setTimeOpen] = useState(false);
   const [timeRange, setTimeRange] = useState('Last 30m');
-  const [showTimeDropdown, setShowTimeDropdown] = useState(false);
-  const [envDropdown, setEnvDropdown] = useState(false);
-  const [selectedEnv, setSelectedEnv] = useState('production-us-east-1');
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [isLiveStreaming, setIsLiveStreaming] = useState(true);
 
-  // Global ⌘K shortcut listener
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        setSpotlightOpen((prev) => !prev);
+        setSpotlightOpen((v) => !v);
       }
+      if (e.key === 'Escape') setSpotlightOpen(false);
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  const navItems = [
-    { href: '/', label: 'Overview', icon: Activity },
-    { href: '/incidents', label: 'Incidents', icon: Zap, count: '3' },
-    { href: '/services', label: 'Services', icon: Server, count: '24' },
-    { href: '/topology', label: 'Topology', icon: Network },
-    { href: '/telemetry', label: 'Telemetry', icon: Terminal },
-    { href: '/anomalies', label: 'Anomalies', icon: Radio, count: '17' },
-    { href: '/simulation', label: 'Simulation', icon: Sliders },
-    { href: '/reports', label: 'Reports', icon: FileText },
-  ];
+  const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href));
+  const current = navItems.find((n) => isActive(n.href))?.label ?? 'Overview';
 
   return (
-    <div className="min-h-screen bg-[#0E0E10] text-[#F2F2F7] flex flex-col selection:bg-blue-600/30 selection:text-white">
-      {/* macOS Window Frame & Unified Titlebar Toolbar */}
-      <header className="sticky top-0 z-40 w-full macos-titlebar border-b border-white/[0.08]">
-        <div className="max-w-[1780px] mx-auto px-3 sm:px-5 h-12 flex items-center justify-between gap-3">
-          
-          {/* Left: Window Traffic Dots & System App Identifier */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 pr-1">
-              <span className="w-3 h-3 rounded-full traffic-dot-close transition-opacity hover:opacity-80 cursor-pointer" title="Close Window" />
-              <span className="w-3 h-3 rounded-full traffic-dot-min transition-opacity hover:opacity-80 cursor-pointer" title="Minimize" />
-              <span className="w-3 h-3 rounded-full traffic-dot-max transition-opacity hover:opacity-80 cursor-pointer" title="Zoom" />
-            </div>
+    <div className="app-shell">
+      <aside className="sidebar">
+        <div className="brand">
+          <BrandMark />
+          <div><strong>InferMesh</strong><small>CONTROL PLANE</small></div>
+          <span className="badge">v2.4.1</span>
+        </div>
 
-            <div className="h-3.5 w-px bg-white/10" />
-
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-6 h-6 rounded-md bg-[#24242A] border border-white/15 flex items-center justify-center text-white shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-              </div>
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-xs font-semibold tracking-tight text-white font-sans">InferMesh</span>
-                <span className="text-[10px] text-apple-textTertiary font-mono">v2.4.1</span>
-              </div>
-            </Link>
-
-            {/* Environment Selector Dropdown */}
-            <div className="relative ml-1 hidden md:block">
-              <button
-                onClick={() => setEnvDropdown(!envDropdown)}
-                className="flex items-center gap-1.5 text-xs text-white/85 macos-toolbar-item px-2 py-1 rounded-[5px]"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-apple-success" />
-                <span className="font-mono text-[11px]">{selectedEnv}</span>
-                <ChevronDown className="w-3 h-3 text-white/40" />
-              </button>
-
-              {envDropdown && (
-                <div className="absolute top-full mt-1 left-0 w-52 py-1 bg-[#1C1C22] border border-white/12 rounded-lg shadow-2xl z-50 text-xs">
-                  {['production-us-east-1', 'production-eu-central-1', 'staging-us-east-1'].map((env) => (
-                    <button
-                      key={env}
-                      onClick={() => {
-                        setSelectedEnv(env);
-                        setEnvDropdown(false);
-                      }}
-                      className="w-full text-left px-3 py-1.5 hover:bg-white/[0.08] text-white/80 flex items-center justify-between"
-                    >
-                      <span className="font-mono text-[11px]">{env}</span>
-                      {selectedEnv === env && <CheckCircle2 className="w-3.5 h-3.5 text-apple-accent" />}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Center: macOS Native Segmented Navigation Tabs */}
-          <nav className="hidden lg:flex items-center macos-segmented-button">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-1.5 px-3 py-1 rounded-[5px] text-[11px] font-medium transition-all duration-100',
-                    isActive
-                      ? 'macos-segmented-item-active'
-                      : 'text-apple-textSecondary hover:text-white hover:bg-white/[0.04]'
-                  )}
+        <div style={{ position: 'relative' }}>
+          <button type="button" className="environment" style={{ width: 'calc(100% - 24px)', textAlign: 'left' }} onClick={() => setEnvOpen(!envOpen)}>
+            <span className="env-dot" />
+            <span><small>ENVIRONMENT</small><strong style={{ fontSize: 11 }}>{env}</strong></span>
+            <ChevronDown className="icon icon-small" />
+          </button>
+          {envOpen && (
+            <div className="alert-popover" style={{ left: 12, right: 12, width: 'auto', top: 58, zIndex: 30 }}>
+              {environments.map((e) => (
+                <button
+                  key={e}
+                  type="button"
+                  className="popover-alert"
+                  style={{ width: '100%', background: 'transparent', border: 0, borderBottom: '1px solid var(--border)', cursor: 'pointer', justifyContent: 'space-between', textAlign: 'left' }}
+                  onClick={() => { setEnv(e); setEnvOpen(false); }}
                 >
-                  <Icon className={cn('w-3.5 h-3.5', isActive ? 'text-white' : 'text-apple-textTertiary')} />
-                  <span>{item.label}</span>
-                  {item.count && (
-                    <span
-                      className={cn(
-                        'text-[9px] px-1.5 py-0.2 rounded font-mono font-medium',
-                        item.count === '3'
-                          ? 'bg-apple-critical/20 text-apple-critical border border-apple-critical/30'
-                          : 'bg-white/10 text-white/70'
-                      )}
-                    >
-                      {item.count}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
+                  <span style={{ font: '500 10px "DM Mono"' }}>{e}</span>
+                  {env === e && <CheckCircle2 className="icon icon-small" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
-          {/* Right: Live Stream Toggle, Time Range, ⌘K Spotlight */}
-          <div className="flex items-center gap-2">
-            {/* Live Streaming Indicator Button */}
-            <button
-              onClick={() => setIsLiveStreaming(!isLiveStreaming)}
-              className={cn(
-                'hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-[5px] text-[11px] font-medium transition macos-toolbar-item',
-                isLiveStreaming ? 'text-apple-success' : 'text-apple-textTertiary'
-              )}
-              title={isLiveStreaming ? 'Live telemetry streaming' : 'Stream paused'}
-            >
-              <span className={cn('w-1.5 h-1.5 rounded-full', isLiveStreaming ? 'bg-apple-success animate-pulse' : 'bg-apple-textTertiary')} />
-              <span className="font-mono text-[10px] uppercase">{isLiveStreaming ? 'Live' : 'Paused'}</span>
+        <nav className="nav-list" aria-label="Primary">
+          <div className="nav-label">WORKSPACE</div>
+          {navItems.map(({ href, label, icon: Icon, count }) => (
+            <Link key={href} href={href} className={`nav-item ${isActive(href) ? 'active' : ''}`}>
+              <Icon className="icon" />
+              <span>{label}</span>
+              {count && <em>{count}</em>}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="sidebar-bottom">
+          <div className="oncall">
+            <span className="avatar">AM</span>
+            <span><small>ON CALL</small><strong>Alex Morgan</strong></span>
+            <span className="badge badge-success">ACTIVE</span>
+          </div>
+          <div className="system-status"><span><i /> All systems operational</span><small>Updated 12s ago</small></div>
+        </div>
+      </aside>
+
+      <main className="workspace">
+        <header className="topbar">
+          <div className="mobile-brand"><BrandMark /><strong>InferMesh</strong></div>
+          <div className="breadcrumb">
+            <span>Workspace</span><ChevronRight className="icon icon-small" /><strong>{current}</strong>
+          </div>
+
+          <div className="top-actions">
+            <button type="button" className={`live-control ${live ? '' : 'paused'}`} onClick={() => setLive(!live)} style={{ padding: '0 8px' }}>
+              <span className="live-dot" />{live ? 'LIVE' : 'PAUSED'}
+              {live ? <Pause className="icon icon-small" /> : <Play className="icon icon-small" />}
             </button>
 
-            {/* Global Time Range Selector */}
-            <div className="relative">
-              <button
-                onClick={() => setShowTimeDropdown(!showTimeDropdown)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-[5px] text-xs text-white/90 macos-toolbar-item"
-              >
-                <Sliders className="w-3 h-3 text-apple-textTertiary" />
-                <span className="font-mono text-[11px]">{timeRange}</span>
-                <ChevronDown className="w-3 h-3 text-white/40" />
+            <div className="alert-wrap">
+              <button type="button" className="time-control" onClick={() => setTimeOpen(!timeOpen)}>
+                <Clock className="icon icon-small" /> {timeRange} <ChevronDown className="icon icon-small" />
               </button>
-
-              {showTimeDropdown && (
-                <div className="absolute top-full right-0 mt-1 w-36 py-1 bg-[#1C1C22] border border-white/12 rounded-lg shadow-2xl z-50 text-xs">
-                  {['Last 5m', 'Last 15m', 'Last 30m', 'Last 1h', 'Last 6h', 'Last 24h'].map((range) => (
+              {timeOpen && (
+                <div className="alert-popover" style={{ width: 150 }}>
+                  {timeRanges.map((r) => (
                     <button
-                      key={range}
-                      onClick={() => {
-                        setTimeRange(range);
-                        setShowTimeDropdown(false);
-                      }}
-                      className="w-full text-left px-3 py-1.5 hover:bg-white/[0.08] text-white/80 flex items-center justify-between"
+                      key={r}
+                      type="button"
+                      className="popover-alert"
+                      style={{ width: '100%', background: 'transparent', border: 0, borderBottom: '1px solid var(--border)', cursor: 'pointer', justifyContent: 'space-between' }}
+                      onClick={() => { setTimeRange(r); setTimeOpen(false); }}
                     >
-                      <span className="text-[11px]">{range}</span>
-                      {timeRange === range && <CheckCircle2 className="w-3.5 h-3.5 text-apple-accent" />}
+                      <span style={{ fontSize: 11 }}>{r}</span>
+                      {timeRange === r && <CheckCircle2 className="icon icon-small" />}
                     </button>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Spotlight ⌘K Command Search */}
-            <button
-              onClick={() => setSpotlightOpen(true)}
-              className="flex items-center gap-2 px-2.5 py-1 rounded-[5px] text-xs text-apple-textSecondary hover:text-white macos-toolbar-item group"
-            >
-              <Search className="w-3.5 h-3.5 text-apple-textTertiary group-hover:text-apple-accent" />
-              <span className="hidden md:inline text-[11px]">Search</span>
-              <kbd className="flex items-center gap-0.5 text-[9px] bg-white/[0.08] px-1 py-0.2 rounded text-apple-textTertiary font-mono">
-                ⌘K
-              </kbd>
+            <button type="button" className="search-control" onClick={() => setSpotlightOpen(true)}>
+              <Search className="icon icon-small" /><span>Search</span><kbd>⌘ K</kbd>
             </button>
 
-            {/* Notifications Bell */}
-            <div className="relative">
-              <button
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="p-1 rounded-[5px] macos-toolbar-item text-apple-textSecondary hover:text-white relative"
-                title="System Notifications"
-              >
-                <Bell className="w-3.5 h-3.5" />
-                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-apple-critical" />
+            <div className="alert-wrap">
+              <button type="button" className="icon-control" title="Alerts" onClick={() => setAlertsOpen(!alertsOpen)}>
+                <Bell className="icon" /><span className="notification">3</span>
               </button>
-
-              {showNotifications && (
-                <div className="absolute top-full right-0 mt-1.5 w-80 p-3 bg-[#1C1C22] border border-white/12 rounded-xl shadow-2xl z-50">
-                  <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
-                    <span className="text-xs font-semibold text-white">Active Incident Alerts</span>
-                    <span className="text-[10px] text-apple-textTertiary font-mono">3 Active</span>
-                  </div>
-                  <div className="space-y-1.5 mt-2 max-h-64 overflow-y-auto">
-                    {mockIncidents.slice(0, 3).map((inc) => (
-                      <div
-                        key={inc.id}
-                        onClick={() => {
-                          setShowNotifications(false);
-                          router.push(`/incidents/${inc.code}`);
-                        }}
-                        className="p-2 rounded-lg bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] cursor-pointer transition"
-                      >
-                        <div className="flex items-center justify-between text-[11px]">
-                          <span className="font-mono text-apple-critical font-semibold">{inc.code}</span>
-                          <span className="text-[10px] text-apple-textTertiary">{inc.startedAt}</span>
-                        </div>
-                        <div className="text-xs text-white/90 font-medium mt-0.5 truncate">{inc.title}</div>
-                        <div className="text-[10px] text-apple-textTertiary mt-1">
-                          Cause: {inc.rootCauseBrief}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+              {alertsOpen && (
+                <div className="alert-popover">
+                  <div className="popover-head"><strong>Active alerts</strong><span className="badge badge-danger">3 OPEN</span></div>
+                  {mockIncidents.slice(0, 3).map((inc) => (
+                    <button
+                      key={inc.id}
+                      type="button"
+                      className="popover-alert"
+                      style={{ width: '100%', background: 'transparent', border: 0, borderBottom: '1px solid var(--border)', cursor: 'pointer', textAlign: 'left' }}
+                      onClick={() => { setAlertsOpen(false); router.push(`/incidents/${inc.code}`); }}
+                    >
+                      <span className="incident-icon"><Zap className="icon" /></span>
+                      <span>
+                        <strong style={{ fontSize: 11 }}>{inc.title}</strong>
+                        <small>{inc.code} · {inc.startedAt}</small>
+                      </span>
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
           </div>
+        </header>
 
+        <div className="mobile-nav">
+          {navItems.map(({ href, label }) => (
+            <Link key={href} href={href} className={isActive(href) ? 'active' : ''}
+              style={{ flex: '0 0 auto', padding: '11px 10px 9px', fontSize: 10, color: isActive(href) ? 'var(--text)' : 'var(--muted)', borderBottom: `2px solid ${isActive(href) ? 'var(--text)' : 'transparent'}` }}>
+              {label}
+            </Link>
+          ))}
         </div>
 
-        {/* Mobile / Tablet Horizontal Navigation Strip */}
-        <div className="lg:hidden flex items-center gap-1 px-3 py-1 overflow-x-auto border-t border-white/[0.04] bg-[#141418]">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'flex items-center gap-1.5 px-2.5 py-1 rounded-[5px] text-[11px] whitespace-nowrap transition-colors',
-                  isActive ? 'bg-white/[0.14] text-white font-medium' : 'text-apple-textSecondary'
-                )}
-              >
-                <Icon className="w-3 h-3" />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </header>
-
-      {/* Main Content Viewport Canvas */}
-      <main className="flex-1 w-full max-w-[1780px] mx-auto px-3 sm:px-5 py-4">
-        {children}
+        <div className="content">{children}</div>
       </main>
 
-      {/* Spotlight Command Palette Modal */}
       <SpotlightPalette isOpen={spotlightOpen} onClose={() => setSpotlightOpen(false)} />
     </div>
   );

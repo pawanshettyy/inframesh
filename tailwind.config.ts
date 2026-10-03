@@ -11,43 +11,40 @@ const config: Config = {
     extend: {
       colors: {
         apple: {
-          canvas: "#090A0C",
-          surface: "#121418",
+          canvas: "#000000",
+          surface: "#0a0a0a",
           card: "rgba(24, 27, 32, 0.75)",
           cardHover: "rgba(32, 36, 44, 0.85)",
           glass: "rgba(255, 255, 255, 0.05)",
           glassBorder: "rgba(255, 255, 255, 0.08)",
           glassHover: "rgba(255, 255, 255, 0.09)",
           glassSpecular: "rgba(255, 255, 255, 0.15)",
-          textPrimary: "#F5F5F7",
-          textSecondary: "#A1A1A6",
-          textTertiary: "#6E6E73",
-          textMuted: "#48484A",
+          textPrimary: "#ededed",
+          textSecondary: "#a1a1a1",
+          textTertiary: "#666666",
+          textMuted: "#444444",
           borderSubtle: "rgba(255, 255, 255, 0.07)",
           borderMedium: "rgba(255, 255, 255, 0.12)",
-          accent: "#2997FF", // Apple system blue
+          accent: "#369eff", // Apple system blue
           accentMuted: "rgba(41, 151, 255, 0.15)",
-          intelligence: "#6366F1", // Subtle AI neural tint
-          success: "#30D158", // Apple system green
-          warning: "#FFD60A", // Apple system yellow
-          degraded: "#FF9F0A", // Apple system orange
-          critical: "#FF453A", // Apple system red
+          intelligence: "#7774ff", // Subtle AI neural tint
+          success: "#3ecf6d", // Apple system green
+          warning: "#f5a623", // Apple system yellow
+          degraded: "#f5a623", // Apple system orange
+          critical: "#ff5b52", // Apple system red
         }
       },
       fontFamily: {
         sans: [
+          "Inter",
           "-apple-system",
           "BlinkMacSystemFont",
-          '"SF Pro Display"',
-          '"SF Pro Text"',
-          '"SF Pro"',
-          "Inter",
           "system-ui",
           "sans-serif"
         ],
         mono: [
+          '"DM Mono"',
           '"SF Mono"',
-          '"Geist Mono"',
           '"Menlo"',
           '"Monaco"',
           '"Courier New"',
