@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: 'infermesh-backend'
+    static_configs:
+      - targets: ['backend:8000']
+
+  - job_name: 'simulated-mesh'
+    static_configs:
+      - targets: ['backend:8000']
