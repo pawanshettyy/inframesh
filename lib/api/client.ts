@@ -1,5 +1,5 @@
 /**
- * InferMesh API Client
+ * InframeSH API Client
  * Connects directly to the FastAPI backend API with automated graceful fallback.
  */
 

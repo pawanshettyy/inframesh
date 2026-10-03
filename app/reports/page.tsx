@@ -130,7 +130,7 @@ export default function ReportsPage() {
               </h1>
 
               <div className="flex flex-wrap items-center gap-4 text-xs text-apple-textSecondary pt-1">
-                <span>Author: <strong>InferMesh Automated RCA Engine</strong></span>
+                <span>Author: <strong>InframeSH Automated RCA Engine</strong></span>
                 <span>·</span>
                 <span>Reviewer: <strong>SRE Platform Team</strong></span>
                 <span>·</span>
@@ -150,7 +150,7 @@ export default function ReportsPage() {
                 <p className="text-indigo-300 font-medium flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                   <span>
-                    InferMesh AI identified <strong>PostgreSQL Primary HikariCP connection pool saturation (97%)</strong> as the definitive root cause with 96% diagnostic confidence.
+                    InframeSH AI identified <strong>PostgreSQL Primary HikariCP connection pool saturation (97%)</strong> as the definitive root cause with 96% diagnostic confidence.
                   </span>
                 </p>
               </div>

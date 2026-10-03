@@ -11,7 +11,7 @@ async def health_check():
     uptime = time.time() - _start_time
     return {
         "status": "healthy",
-        "service": "infermesh-core-backend",
+        "service": "inframesh-core-backend",
         "version": settings.VERSION,
         "uptime_seconds": round(uptime, 2),
         "database": "connected (async SQLite/PostgreSQL)",

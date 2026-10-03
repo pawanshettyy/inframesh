@@ -1,5 +1,5 @@
 services:
-  # InferMesh Next.js Frontend
+  # InframeSH Next.js Frontend
   frontend:
     build:
       context: .
@@ -12,7 +12,7 @@ services:
     depends_on:
       - backend
 
-  # InferMesh FastAPI Core & RCA Engine
+  # InframeSH FastAPI Core & RCA Engine
   backend:
     build:
       context: .
@@ -20,7 +20,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/infermesh
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/inframesh
       - REDIS_URL=redis://redis:6379/0
       - PROMETHEUS_URL=http://prometheus:9090
       - LOKI_URL=http://loki:3100
@@ -36,7 +36,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: infermesh
+      POSTGRES_DB: inframesh
     ports:
       - "5432:5432"
     volumes:

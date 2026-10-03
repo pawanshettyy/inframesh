@@ -2,7 +2,7 @@
 set -e
 
 echo "========================================================"
-echo "    Running INFERMESH Test Suite"
+echo "    Running INFRAMESH Test Suite"
 echo "========================================================"
 
 PYTHONPATH=. ./backend/venv/bin/pytest backend/tests/ -v

@@ -2,7 +2,7 @@
 set -e
 
 echo "========================================================"
-echo "    Starting INFERMESH Full-Stack Platform"
+echo "    Starting INFRAMESH Full-Stack Platform"
 echo "========================================================"
 
 # 1. Setup Python virtual environment if not present
@@ -23,7 +23,7 @@ lsof -ti:8000 | xargs kill -9 2>/dev/null || true
 lsof -ti:3000 | xargs kill -9 2>/dev/null || true
 
 # 4. Start FastAPI Backend in background
-echo "Starting InferMesh Core Backend on http://localhost:8000..."
+echo "Starting InframeSH Core Backend on http://localhost:8000..."
 PYTHONPATH=. ./backend/venv/bin/python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 &
 BACKEND_PID=$!
 
@@ -31,7 +31,7 @@ BACKEND_PID=$!
 trap "kill -9 $BACKEND_PID 2>/dev/null || true" EXIT
 
 # 5. Start Next.js Frontend
-echo "Starting InferMesh Frontend on http://localhost:3000..."
+echo "Starting InframeSH Frontend on http://localhost:3000..."
 npm run dev
 
 wait

@@ -59,7 +59,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <aside className="sidebar">
         <div className="brand">
           <BrandMark />
-          <div><strong>InferMesh</strong><small>CONTROL PLANE</small></div>
+          <div><strong>InframeSH</strong><small>CONTROL PLANE</small></div>
           <span className="badge">v2.4.1</span>
         </div>
 
@@ -110,7 +110,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
       <main className="workspace">
         <header className="topbar">
-          <div className="mobile-brand"><BrandMark /><strong>InferMesh</strong></div>
+          <div className="mobile-brand"><BrandMark /><strong>InframeSH</strong></div>
           <div className="breadcrumb">
             <span>Workspace</span><ChevronRight className="icon icon-small" /><strong>{current}</strong>
           </div>

@@ -30,7 +30,7 @@ htmlcov/
 *.db
 *.sqlite
 *.sqlite3
-infermesh.db
+inframesh.db
 
 # Environment variables
 .env

@@ -1,6 +1,6 @@
 <div align="center">
 
-# INFERMESH
+# INFRAMESH
 
 ### *Intelligent Incident Diagnosis & Root Cause Analysis for Distributed Systems*
 
@@ -13,9 +13,9 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
 <p align="center">
-  <b>InferMesh</b> is an AI-powered observability and incident diagnosis platform designed for SREs, platform teams, and DevOps engineers operating high-throughput distributed systems.
+  <b>InframeSH</b> is an AI-powered observability and incident diagnosis platform designed for SREs, platform teams, and DevOps engineers operating high-throughput distributed systems.
   <br />
-  Combining a spatial, macOS Sequoia-inspired human interface with an evidence-driven multi-signal Root Cause Analysis (RCA) engine, InferMesh autonomously correlates metrics, structured logs, and distributed traces to isolate root causes with explainable mathematical confidence.
+  Combining a spatial, macOS Sequoia-inspired human interface with an evidence-driven multi-signal Root Cause Analysis (RCA) engine, InframeSH autonomously correlates metrics, structured logs, and distributed traces to isolate root causes with explainable mathematical confidence.
 </p>
 
 [Quick Start](#-quick-start) • [Architecture](#-system-architecture) • [Demo Scenario](#-primary-demo-scenario) • [RCA Algorithm](#-mathematical-rca-engine) • [API Reference](#-api-reference)
@@ -40,7 +40,7 @@
 
 ```
                                ┌──────────────────────────────────────────────────────────┐
-                               │                      InferMesh UI                       │
+                               │                      InframeSH UI                       │
                                │        Next.js 15 · React 19 · Tailwind · Recharts       │
                                └────────────────────────────┬─────────────────────────────┘
                                                             │ (REST & WebSocket /ws)
@@ -123,8 +123,8 @@ $$\text{Final Confidence} = \mathbf{96\%} \quad (p < 0.001)$$
 
 ```bash
 # Clone the repository
-git clone https://github.com/rjmdhiraj/infermesh.git
-cd infermesh
+git clone https://github.com/rjmdhiraj/inframesh.git
+cd inframesh
 
 # Launch full platform (Backend + Frontend)
 ./start.sh
@@ -202,7 +202,7 @@ Run the full automated Pytest test suite:
 ## 📁 Repository Structure
 
 ```
-infermesh/
+inframesh/
 ├── app/                              # Next.js 15 App Router Workspaces
 │   ├── page.tsx                      # System Overview & Activity Monitor Canvas
 │   ├── incidents/[id]/page.tsx       # 3-Layer Incident Workspace & Apple Intelligence

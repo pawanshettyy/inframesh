@@ -36,13 +36,13 @@ async def lifespan(app: FastAPI):
     # Startup
     await init_db()
     ticker_task = asyncio.create_task(telemetry_background_ticker())
-    print("✓ InferMesh Database initialized")
-    print(f"✓ InferMesh Core Engine v{settings.VERSION} ready on port {settings.PORT}")
+    print("✓ InframeSH Database initialized")
+    print(f"✓ InframeSH Core Engine v{settings.VERSION} ready on port {settings.PORT}")
     print("✓ Live Telemetry Streaming Ticker active (2s interval)")
     yield
     # Shutdown
     ticker_task.cancel()
-    print("InferMesh Backend shutting down...")
+    print("InframeSH Backend shutting down...")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

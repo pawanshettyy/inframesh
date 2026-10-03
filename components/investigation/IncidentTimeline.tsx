@@ -72,7 +72,7 @@ export function IncidentTimeline({ onSelectEvent }: IncidentTimelineProps) {
       id: 't-5',
       timeOffset: 't + 2m',
       absoluteTime: '13:13:45',
-      service: 'InferMesh AI',
+      service: 'InframeSH AI',
       title: 'Automated Root Cause Correlation',
       description: 'Multi-signal causal graph converged on PostgreSQL connection pool with 96% AI confidence.',
       severity: 'info',

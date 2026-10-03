@@ -1,1 +1,1 @@
-# InferMesh Backend Package
+# InframeSH Backend Package

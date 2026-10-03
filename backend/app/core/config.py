@@ -5,7 +5,7 @@ from pydantic import Field
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="ignore")
 
-    PROJECT_NAME: str = "InferMesh"
+    PROJECT_NAME: str = "InframeSH"
     VERSION: str = "2.4.0"
     API_V1_STR: str = "/api/v1"
     
@@ -16,12 +16,12 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     
     # Security & Auth
-    SECRET_KEY: str = "infermesh_super_secret_jwt_key_securerandom_32_chars"
+    SECRET_KEY: str = "inframesh_super_secret_jwt_key_securerandom_32_chars"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7 # 7 days
     ALGORITHM: str = "HS256"
     
     # Database
-    DATABASE_URL: str = "sqlite+aiosqlite:///./infermesh.db"
+    DATABASE_URL: str = "sqlite+aiosqlite:///./inframesh.db"
     
     # Redis
     REDIS_URL: Optional[str] = None
