@@ -130,6 +130,16 @@ cd inframesh
 ./start.sh
 ```
 
+On Windows PowerShell, use:
+
+```powershell
+.\start.ps1
+```
+
+The Windows launcher configures UTF-8 output before starting FastAPI, creates
+the repository-local `.venv`, installs backend dependencies, and uses
+`npm ci` for the frontend when dependencies are not already installed.
+
 - 🖥️ **Frontend Interface**: [http://localhost:3000](http://localhost:3000)
 - ⚙️ **FastAPI Backend**: [http://localhost:8000](http://localhost:8000)
 - 📖 **Interactive OpenAPI Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
